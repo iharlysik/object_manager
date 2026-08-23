@@ -21,6 +21,16 @@ class ManagerPanel : public CAppDialog {
       bool Init(void);
       virtual bool OnEvent(const int id, const long &lparam, const double &dparam, const string &sparam);
       
+      void ChartEvent(const int id, const long &lparam, const double &dparam, const string &sparam) {
+         CAppDialog::ChartEvent(id, lparam, dparam, sparam);
+         
+         // 2. ОТЛОВЛИВАЕМ ПЕРЕМЕЩЕНИЕ ПО ИСТОРИИ
+         //if (id == CHARTEVENT_CHART_CHANGE) {
+            // Метод сам проверит, включен ли режим, и если надо — подвинет график 1М
+            //m_engine.SyncChartPosition();
+         //}
+      }
+
    private:
       bool CreateCloneUpdateButton(void);
       bool CreateDeleteButton(void);
@@ -31,7 +41,9 @@ class ManagerPanel : public CAppDialog {
 
 ManagerPanel::ManagerPanel(void) : m_button_height(30),
                                      m_left_indent(10),
-                                     m_top_indent(10) {}
+                                     m_top_indent(10) {
+                                       //m_engine.SetSyncEnabled(true);
+                                     }
                                      
 ManagerPanel::~ManagerPanel(void) {}
 
