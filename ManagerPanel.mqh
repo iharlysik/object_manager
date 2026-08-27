@@ -19,7 +19,7 @@ class ManagerPanel : public CAppDialog {
       ~ManagerPanel(void);
       
       bool Init(void);
-      virtual bool OnEvent(const int id, const long &lparam, const double &dparam, const string &sparam);
+      //virtual bool OnEvent(const int id, const long &lparam, const double &dparam, const string &sparam);
       
       void ChartEvent(const int id, const long &lparam, const double &dparam, const string &sparam) {
          CAppDialog::ChartEvent(id, lparam, dparam, sparam);
@@ -29,14 +29,29 @@ class ManagerPanel : public CAppDialog {
             // Метод сам проверит, включен ли режим, и если надо — подвинет график 1М
             //m_engine.SyncChartPosition();
          //}
+         
+         if (id == CHARTEVENT_OBJECT_CREATE) {
+            Print("CREATE");
+            m_engine.Copy(sparam);
+         }
+         
+         if (id == CHARTEVENT_OBJECT_CHANGE) { 
+            Print("CHANGE");
+         }
+         
+         if (id == CHARTEVENT_OBJECT_DELETE) {
+            Print("DELETE");
+            m_engine.Delete(sparam);
+         }
+         
+         if (id == CHARTEVENT_OBJECT_DRAG) {
+            Print("DRAG");
+         }
       }
 
    private:
       bool CreateCloneUpdateButton(void);
       bool CreateDeleteButton(void);
-      
-      void OnClickCloneUpdateButton(void);
-      void OnClickDeleteButton(void);
 };
 
 ManagerPanel::ManagerPanel(void) : m_button_height(30),
@@ -46,12 +61,12 @@ ManagerPanel::ManagerPanel(void) : m_button_height(30),
                                      }
                                      
 ManagerPanel::~ManagerPanel(void) {}
-
+/*
 EVENT_MAP_BEGIN(ManagerPanel)
    ON_EVENT(ON_CLICK, m_clone_update_button, OnClickCloneUpdateButton)
    ON_EVENT(ON_CLICK, m_delete_button, OnClickDeleteButton)
 EVENT_MAP_END(CAppDialog)
-
+*/
 bool ManagerPanel::Init(void) {
    int chart_width = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS, 0);
    int x2 = chart_width - 10;
@@ -65,6 +80,9 @@ bool ManagerPanel::Init(void) {
    }
    
    Run();
+   
+   ChartSetInteger(m_chart_id, CHART_EVENT_OBJECT_CREATE, true);
+   ChartSetInteger(m_chart_id, CHART_EVENT_OBJECT_DELETE, true);
    
    return true;
 }
@@ -105,12 +123,4 @@ bool ManagerPanel::CreateDeleteButton(void) {
    }
 
    return true;
-}
-
-void ManagerPanel::OnClickCloneUpdateButton(void) {
-   m_engine.CopyOrUpdateSelected();
-}
-
-void ManagerPanel::OnClickDeleteButton(void) {
-   m_engine.DeleteSelected();
 }

@@ -20,4 +20,8 @@ public:
       
       return false;
    }
+   
+   virtual void Drag(long target_chart_id) override {
+      ObjectSetDouble(target_chart_id, m_name, OBJPROP_PRICE, 0, m_price);
+   }
 };

@@ -40,78 +40,42 @@ public:
    GraphSyncEngine() : m_sync_enabled(false) {};
    ~GraphSyncEngine() {};
    
-   void CopyOrUpdateSelected() {
+   void Copy(string obj_name) {
       long current_chart = ChartID();
       string symbol = ChartSymbol();
       
-      int totals = ObjectsTotal(current_chart, 0, -1);
+      ENUM_OBJECT type = (ENUM_OBJECT)ObjectGetInteger(current_chart, obj_name, OBJPROP_TYPE);
+      GraphicObject *obj = CreateObject(current_chart, obj_name, type);
       
-      for (int i = 0; i < totals; i++) {
-         string name = ObjectName(current_chart, i, 0);
+      if (obj != NULL) {
+         long target_chart = ChartFirst();
          
-         if (
-            ObjectGetInteger(current_chart, name, OBJPROP_SELECTED) &&
-            !ObjectGetInteger(current_chart, name, OBJPROP_HIDDEN)
-         ) {
-            ENUM_OBJECT type = (ENUM_OBJECT)ObjectGetInteger(current_chart, name, OBJPROP_TYPE);
-            GraphicObject *obj = CreateObject(current_chart, name, type);
-            
-            if (obj != NULL) {
-               long target_chart = ChartFirst();
-               
-               while (target_chart >= 0) {
-                  if (ChartSymbol(target_chart) == symbol && target_chart != current_chart) {
-                     obj.CopyToChart(target_chart);
-                  }
-                  
-                  target_chart = ChartNext(target_chart);
-               }
-               
-               delete obj; 
+         while (target_chart >= 0) {
+            if (ChartSymbol(target_chart) == symbol && target_chart != current_chart) {
+               obj.CopyToChart(target_chart);
+               ChartRedraw(target_chart);
             }
+            
+            target_chart = ChartNext(target_chart);
          }
+         
+         delete obj; 
       }
-      
-      ChartsRedraw();
    }
    
-   void DeleteSelected() {
+   void Delete(string obj_name) {
       long current_chart = ChartID();
       string symbol = ChartSymbol();
-      
-      int totals = ObjectsTotal(current_chart, 0, -1);
-         
-      string obj_names[];
-      
-      for (int i = 0; i < totals; i++) {
-         string name = ObjectName(current_chart, i, 0);
-         
-         if (
-            ObjectGetInteger(current_chart, name, OBJPROP_SELECTED) &&
-            !ObjectGetInteger(current_chart, name, OBJPROP_HIDDEN)
-         ) {
-            obj_names.Push(name);
-         }   
-      }
-      
       long target_chart = ChartFirst();
-      int name_size = ArraySize(obj_names);
             
       while (target_chart >= 0) {
-         if (ChartSymbol(target_chart) == symbol) {
-            for (int i = 0; i < name_size; i++) {
-               string obj_name = obj_names[i];
-               
-               if (ObjectFind(target_chart, obj_name) == 0) {
-                  ObjectDelete(target_chart, obj_names[i]);
-               }
-            }
+         if ((ChartSymbol(target_chart) == symbol) && (target_chart != current_chart) && (ObjectFind(target_chart, obj_name) == 0)) {
+            ObjectDelete(target_chart, obj_name);
+            ChartRedraw(target_chart);
          }
          
          target_chart = ChartNext(target_chart);
       }
-      
-      ChartsRedraw();
    }
    
    // Сеттер для переключения режима извне (из интерфейса)

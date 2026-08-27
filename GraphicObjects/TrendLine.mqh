@@ -33,4 +33,11 @@ public:
       
       return false;
    }
+   
+   virtual void Drag(long target_chart_id) override {
+      ObjectSetInteger(target_chart_id, m_name, OBJPROP_TIME, 0, m_time1);
+      ObjectSetDouble(target_chart_id, m_name, OBJPROP_PRICE, 0, m_price1);
+      ObjectSetInteger(target_chart_id, m_name, OBJPROP_TIME, 1, m_time2);
+      ObjectSetDouble(target_chart_id, m_name, OBJPROP_PRICE, 1, m_price2);
+   }
 };

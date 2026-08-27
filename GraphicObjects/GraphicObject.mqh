@@ -14,6 +14,8 @@ protected:
       ObjectSetInteger(target_chart_id, m_name, OBJPROP_WIDTH, m_width);
       ObjectSetInteger(target_chart_id, m_name, OBJPROP_BACK, m_back);
       ObjectSetInteger(target_chart_id, m_name, OBJPROP_TIMEFRAMES, m_timeframes);
+      ObjectSetInteger(target_chart_id, m_name, OBJPROP_HIDDEN, false);
+      ObjectSetInteger(target_chart_id, m_name, OBJPROP_SELECTABLE, true);
    }
 
 public:
@@ -27,6 +29,7 @@ public:
    
    virtual ~GraphicObject() {}
    virtual bool CopyToChart(long target_chart_id) = 0;
+   virtual void Drag(long target_chart_id) = 0;
    
    bool DeleteFromChart(long target_chart_id) {
       return ObjectDelete(target_chart_id, m_name);
