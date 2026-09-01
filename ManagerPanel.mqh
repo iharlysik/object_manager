@@ -37,6 +37,7 @@ class ManagerPanel : public CAppDialog {
          
          if (id == CHARTEVENT_OBJECT_CHANGE) { 
             Print("CHANGE");
+            m_engine.Change(sparam);
          }
          
          if (id == CHARTEVENT_OBJECT_DELETE) {
@@ -46,6 +47,7 @@ class ManagerPanel : public CAppDialog {
          
          if (id == CHARTEVENT_OBJECT_DRAG) {
             Print("DRAG");
+            m_engine.Drag(sparam);
          }
       }
 

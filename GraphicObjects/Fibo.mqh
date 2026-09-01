@@ -3,7 +3,7 @@
 
 struct FiboLevelProps {
    double value;
-   string text;
+   string desc;
    int width;
    color clr;
    ENUM_LINE_STYLE style;
@@ -23,24 +23,27 @@ private:
    
 public:
    Fibo(long curr_chart_id, string name) : GraphicObject(curr_chart_id, name) {
-      m_time1 = (datetime)ObjectGetInteger(m_curr_chart_id, m_name, OBJPROP_TIME, 0);
-      m_price1 = ObjectGetDouble(m_curr_chart_id, m_name, OBJPROP_PRICE, 0);
-      m_time2 = (datetime)ObjectGetInteger(m_curr_chart_id, m_name, OBJPROP_TIME, 1);
-      m_price2 = ObjectGetDouble(m_curr_chart_id, m_name, OBJPROP_PRICE, 1);
-      m_ray_left = (bool)ObjectGetInteger(m_curr_chart_id, m_name, OBJPROP_RAY_LEFT);
-      m_ray_right = (bool)ObjectGetInteger(m_curr_chart_id, m_name, OBJPROP_RAY_RIGHT);
-      m_levels_count = (int)ObjectGetInteger(m_curr_chart_id, m_name, OBJPROP_LEVELS);
+      m_chart_object.NumPoints(2);
+      
+      m_time1 = m_chart_object.Time(0);
+      m_price1 = m_chart_object.Price(0);
+      m_time2 = m_chart_object.Time(1);
+      m_price2 = m_chart_object.Price(1);
+      m_ray_left  = m_chart_object.RayLeft();
+      m_ray_right = m_chart_object.RayRight();
+      
+      m_levels_count = m_chart_object.LevelsCount();
       
       ArrayResize(m_levels, m_levels_count);
       
       for (int i = 0; i < m_levels_count; i++) {
          FiboLevelProps level;
       
-         level.value = ObjectGetDouble(m_curr_chart_id, m_name, OBJPROP_LEVELVALUE, i);
-         level.text = ObjectGetString(m_curr_chart_id, m_name, OBJPROP_LEVELTEXT, i);
-         level.width = (int)ObjectGetInteger(m_curr_chart_id, m_name, OBJPROP_LEVELWIDTH, i);
-         level.clr = (color)ObjectGetInteger(m_curr_chart_id, m_name, OBJPROP_LEVELCOLOR, i);
-         level.style = (ENUM_LINE_STYLE)ObjectGetInteger(m_curr_chart_id, m_name, OBJPROP_LEVELSTYLE, i);
+         level.value = m_chart_object.LevelValue(i);
+         level.desc = m_chart_object.LevelDescription(i);
+         level.width = m_chart_object.LevelWidth(i);
+         level.clr = m_chart_object.LevelColor(i);
+         level.style = m_chart_object.LevelStyle(i);
          
          m_levels[i] = level;
       }
@@ -48,19 +51,21 @@ public:
 
    virtual bool CopyToChart(long target_chart_id) override {
       if (ObjectCreate(target_chart_id, m_name, OBJ_FIBO, 0, m_time1, m_price1, m_time2, m_price2)) {
-         ObjectSetInteger(target_chart_id, m_name, OBJPROP_RAY_LEFT, m_ray_left);
-         ObjectSetInteger(target_chart_id, m_name, OBJPROP_RAY_RIGHT, m_ray_right);
-         ObjectSetInteger(target_chart_id, m_name, OBJPROP_LEVELS, m_levels_count);
+         m_chart_object.ChartId(target_chart_id);
+         
+         m_chart_object.RayLeft(m_ray_left);
+         m_chart_object.RayRight(m_ray_right);
+         m_chart_object.LevelsCount(m_levels_count);
          
          for (int i = 0; i < m_levels_count; i++) {
-            ObjectSetDouble(target_chart_id, m_name, OBJPROP_LEVELVALUE, i, m_levels[i].value);
-            ObjectSetString(target_chart_id, m_name, OBJPROP_LEVELTEXT, i, m_levels[i].text);
-            ObjectSetInteger(target_chart_id, m_name, OBJPROP_LEVELWIDTH, i, m_levels[i].width);
-            ObjectSetInteger(target_chart_id, m_name, OBJPROP_LEVELCOLOR, i, m_levels[i].clr);
-            ObjectSetInteger(target_chart_id, m_name, OBJPROP_LEVELSTYLE, i, m_levels[i].style);
+            m_chart_object.LevelValue(i, m_levels[i].value);
+            m_chart_object.LevelDescription(i, m_levels[i].desc);
+            m_chart_object.LevelWidth(i, m_levels[i].width);
+            m_chart_object.LevelColor(i, m_levels[i].clr);
+            m_chart_object.LevelStyle(i, m_levels[i].style);
          }
          
-         ApplyCommonProperties(target_chart_id);
+         ApplyCommonProperties();
          
          return true;
       }
@@ -69,9 +74,29 @@ public:
    }
    
    virtual void Drag(long target_chart_id) override {
-      ObjectSetInteger(target_chart_id, m_name, OBJPROP_TIME, 0, m_time1);
-      ObjectSetDouble(target_chart_id, m_name, OBJPROP_PRICE, 0, m_price1);
-      ObjectSetInteger(target_chart_id, m_name, OBJPROP_TIME, 1, m_time2);
-      ObjectSetDouble(target_chart_id, m_name, OBJPROP_PRICE, 1, m_price2);
+      m_chart_object.ChartId(target_chart_id);
+      m_chart_object.SetPoint(0, m_time1, m_price1);
+      m_chart_object.SetPoint(1, m_time2, m_price2);
+   }
+   
+   virtual void Change(long target_chart_id) override {
+      m_chart_object.ChartId(target_chart_id);
+      
+      m_chart_object.RayLeft(m_ray_left);
+      m_chart_object.RayRight(m_ray_right);
+      m_chart_object.SetPoint(0, m_time1, m_price1);
+      m_chart_object.SetPoint(1, m_time2, m_price2);
+      
+      m_chart_object.LevelsCount(m_levels_count);
+      
+      for (int i = 0; i < m_levels_count; i++) {
+         m_chart_object.LevelValue(i, m_levels[i].value);
+         m_chart_object.LevelDescription(i, m_levels[i].desc);
+         m_chart_object.LevelWidth(i, m_levels[i].width);
+         m_chart_object.LevelColor(i, m_levels[i].clr);
+         m_chart_object.LevelStyle(i, m_levels[i].style);
+      }
+      
+      ApplyCommonProperties();
    }
 };

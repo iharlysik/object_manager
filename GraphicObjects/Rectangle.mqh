@@ -12,18 +12,22 @@ private:
 
 public:
    Rectangle(long curr_chart_id, string name) : GraphicObject(curr_chart_id, name) {
-      m_time1 = (datetime)ObjectGetInteger(m_curr_chart_id, m_name, OBJPROP_TIME, 0);
-      m_price1 = ObjectGetDouble(m_curr_chart_id, m_name, OBJPROP_PRICE, 0);
-      m_time2 = (datetime)ObjectGetInteger(m_curr_chart_id, m_name, OBJPROP_TIME, 1);
-      m_price2 = ObjectGetDouble(m_curr_chart_id, m_name, OBJPROP_PRICE, 1);
-      m_fill = (bool)ObjectGetInteger(m_curr_chart_id, m_name, OBJPROP_FILL);
+      m_chart_object.NumPoints(2);
+      
+      m_time1 = m_chart_object.Time(0);
+      m_price1 = m_chart_object.Price(0);
+      m_time2 = m_chart_object.Time(1);
+      m_price2 = m_chart_object.Price(1);
+      m_fill = m_chart_object.Fill();
    }
 
    virtual bool CopyToChart(long target_chart_id) override {
       if (ObjectCreate(target_chart_id, m_name, OBJ_RECTANGLE, 0, m_time1, m_price1, m_time2, m_price2)) {
-         ObjectSetInteger(target_chart_id, m_name, OBJPROP_FILL, m_fill);
+         m_chart_object.ChartId(target_chart_id);
          
-         ApplyCommonProperties(target_chart_id);
+         m_chart_object.Fill(m_fill);
+         
+         ApplyCommonProperties();
          
          return true;
       }
@@ -32,9 +36,18 @@ public:
    }
    
    virtual void Drag(long target_chart_id) override {
-      ObjectSetInteger(target_chart_id, m_name, OBJPROP_TIME, 0, m_time1);
-      ObjectSetDouble(target_chart_id, m_name, OBJPROP_PRICE, 0, m_price1);
-      ObjectSetInteger(target_chart_id, m_name, OBJPROP_TIME, 1, m_time2);
-      ObjectSetDouble(target_chart_id, m_name, OBJPROP_PRICE, 1, m_price2);
+      m_chart_object.ChartId(target_chart_id);
+      m_chart_object.SetPoint(0, m_time1, m_price1);
+      m_chart_object.SetPoint(1, m_time2, m_price2);
+   }
+   
+   virtual void Change(long target_chart_id) override {
+      m_chart_object.ChartId(target_chart_id);
+      
+      m_chart_object.Fill(m_fill);
+      m_chart_object.SetPoint(0, m_time1, m_price1);
+      m_chart_object.SetPoint(1, m_time2, m_price2);
+      
+      ApplyCommonProperties();
    }
 };
