@@ -31,22 +31,18 @@ class ManagerPanel : public CAppDialog {
          //}
          
          if (id == CHARTEVENT_OBJECT_CREATE) {
-            Print("CREATE");
             m_engine.Copy(sparam);
          }
          
-         if (id == CHARTEVENT_OBJECT_CHANGE) { 
-            Print("CHANGE");
+         if (id == CHARTEVENT_OBJECT_CHANGE) {
             m_engine.Change(sparam);
          }
          
          if (id == CHARTEVENT_OBJECT_DELETE) {
-            Print("DELETE");
             m_engine.Delete(sparam);
          }
          
          if (id == CHARTEVENT_OBJECT_DRAG) {
-            Print("DRAG");
             m_engine.Drag(sparam);
          }
       }
